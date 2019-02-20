@@ -10,6 +10,8 @@ import CanvasHelpers from "./canvasHelpers";
 import { AssetPreview, ContentSource } from "../../common/assetPreview/assetPreview";
 import { SelectionMode } from "vott-ct/lib/js/CanvasTools/Selection/AreaSelector";
 import { Editor } from "vott-ct/lib/js/CanvasTools/CanvasTools.Editor";
+import { KeyboardBinding } from "../../common/keyboardBinding/keyboardBinding";
+import { KeyEventType } from "../../common/keyboardManager/keyboardManager";
 
 export interface ICanvasProps extends React.Props<Canvas> {
     selectedAsset: IAssetMetadata;
@@ -25,6 +27,7 @@ export interface ICanvasState {
     contentSource: ContentSource;
     selectedRegions?: IRegion[];
     canvasEnabled: boolean;
+    multiSelect: boolean;
 }
 
 export default class Canvas extends React.Component<ICanvasProps, ICanvasState> {
@@ -42,6 +45,7 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         contentSource: null,
         selectedRegions: [],
         canvasEnabled: true,
+        multiSelect: false,
     };
 
     private canvasZone: React.RefObject<HTMLDivElement> = React.createRef();
@@ -81,6 +85,16 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
     public render = () => {
         return (
             <Fragment>
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyDown}
+                    accelerators={["Shift"]}
+                    onKeyEvent={() => this.setMultiSelect(true)}
+                />
+                <KeyboardBinding
+                    keyEventType={KeyEventType.KeyUp}
+                    accelerators={["Shift"]}
+                    onKeyEvent={() => this.setMultiSelect(false)}
+                />
                 <div id="ct-zone"
                     ref={this.canvasZone}
                     className={this.state.canvasEnabled ? "canvas-enabled" : "canvas-disabled"}>
@@ -101,6 +115,10 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
         for (const region of this.state.selectedRegions) {
             this.toggleTagOnRegion(region, selectedTag);
         }
+    }
+
+    private setMultiSelect = (multiSelect: boolean) => {
+        this.setState({multiSelect});
     }
 
     /**
@@ -189,10 +207,10 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
      * @param {boolean} multiselection boolean whether multiselect is active
      * @returns {void}
      */
-    private onRegionSelected = (id: string, multiselect: boolean) => {
+    private onRegionSelected = (id: string) => {
         const region = this.state.currentAsset.regions.find((region) => region.id === id);
         let selectedRegions = this.state.selectedRegions;
-        if (multiselect) {
+        if (this.state.multiSelect) {
             selectedRegions.push(region);
         } else {
             selectedRegions = [region];

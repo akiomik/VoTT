@@ -13,6 +13,7 @@ import { Editor } from "vott-ct/lib/js/CanvasTools/CanvasTools.Editor";
 jest.mock("vott-ct/lib/js/CanvasTools/Region/RegionsManager");
 import { RegionsManager } from "vott-ct/lib/js/CanvasTools/Region/RegionsManager";
 import { SelectionMode, AreaSelector } from "vott-ct/lib/js/CanvasTools/Selection/AreaSelector";
+import { KeyboardManager, KeyEventType } from "../../common/keyboardManager/keyboardManager";
 
 describe("Editor Canvas", () => {
 
@@ -32,6 +33,17 @@ describe("Editor Canvas", () => {
                     <AssetPreview {...aProps} />
                 </Canvas>,
             );
+    }
+
+    function createKeyboardWrappedComponent() {
+        const props = createProps();
+        return mount(
+            <KeyboardManager>
+                <Canvas {...props.canvas}>
+                    <AssetPreview {...props.assetPreview}/>
+                </Canvas>
+            </KeyboardManager>,
+        );
     }
     function getAssetMetadata() {
         return MockFactory.createTestAssetMetadata(
@@ -75,6 +87,7 @@ describe("Editor Canvas", () => {
             selectedRegions: [],
             canvasEnabled: true,
             currentAsset: getAssetMetadata(),
+            multiSelect: false,
         });
 
         expect(wrapper.instance().editor.RM.deleteAllRegions).toBeCalled();
@@ -200,23 +213,46 @@ describe("Editor Canvas", () => {
         expect(wrapper.instance().state.selectedRegions.length).toEqual(0);
     });
 
+    function dispatchKeyEvent(key, eventType= KeyEventType.KeyDown) {
+        window.dispatchEvent(new KeyboardEvent(eventType, {key}));
+    }
+
     it("onRegionSelected adds region to list of selected regions on asset", () => {
-        const wrapper = createComponent();
-        const canvas = wrapper.instance();
+        const wrapper = createKeyboardWrappedComponent().find(Canvas);
+        const canvas = wrapper.instance() as Canvas;
 
         const originalAssetMetadata = getAssetMetadata();
 
-        expect(wrapper.state().currentAsset.regions.length).toEqual(originalAssetMetadata.regions.length);
+        expect(canvas.state.currentAsset.regions.length).toEqual(originalAssetMetadata.regions.length);
 
-        canvas.editor.onRegionSelected("test1", false);
+        /**
+         * Canvas editor API's multiselect (param 2) doesn't actually do anything
+         * Setting to null to avoid future confusion
+         */
+        canvas.editor.onRegionSelected("test1", null);
         expect(wrapper.state().selectedRegions.length).toEqual(1);
         expect(wrapper.state().selectedRegions)
             .toMatchObject([MockFactory.createTestRegion("test1")]);
 
-        canvas.editor.onRegionSelected("test2", true);
+        // Enable multi-select
+        dispatchKeyEvent("Shift");
+
+        /**
+         * Canvas editor API's multiselect (param 2) doesn't actually do anything
+         * Setting to null to avoid future confusion
+         */
+        canvas.editor.onRegionSelected("test2", null);
         expect(wrapper.state().selectedRegions.length).toEqual(2);
         expect(wrapper.state().selectedRegions)
             .toMatchObject([MockFactory.createTestRegion("test1"), MockFactory.createTestRegion("test2")]);
+
+        // Disable multi-select
+        dispatchKeyEvent("Shift", KeyEventType.KeyUp);
+
+        canvas.editor.onRegionSelected("test3", null);
+        expect(wrapper.state().selectedRegions.length).toEqual(1);
+        expect(wrapper.state().selectedRegions)
+            .toMatchObject([MockFactory.createTestRegion("test3")]);
     });
 
     it("Applies tag to selected region", () => {
