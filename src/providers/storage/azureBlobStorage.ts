@@ -63,6 +63,12 @@ export class AzureBlobStorage implements IStorageProvider {
         });
     }
 
+    public async fileExists(blobName: string): Promise<boolean> {
+        const containerName = this.options.containerName;
+        const files = await this.listFiles(containerName);
+        return files.indexOf(blobName) > -1;
+    }
+
     /**
      * Reads text from specified blob
      * @param blobName - Name of blob in container
@@ -70,10 +76,14 @@ export class AzureBlobStorage implements IStorageProvider {
     public readText(blobName: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             try {
-                const blockBlobURL = this.getBlockBlobURL(blobName);
-                const downloadResponse = await blockBlobURL.download(Aborter.none, 0);
-                const downloadString = await this.bodyToString(downloadResponse);
-                resolve(downloadString);
+                if (await this.fileExists(blobName)) {
+                    const blockBlobURL = this.getBlockBlobURL(blobName);
+                    const downloadResponse = await blockBlobURL.download(Aborter.none, 0);
+                    const downloadString = await this.bodyToString(downloadResponse);
+                    resolve(downloadString);
+                } else {
+                    reject(`Blob "${blobName}" does not exist in "${this.options.containerName}"`);
+                }
             } catch (e) {
                 reject(e);
             }
@@ -126,8 +136,12 @@ export class AzureBlobStorage implements IStorageProvider {
     public deleteFile(blobName: string): Promise<void> {
         return new Promise<void>(async (resolve, reject) => {
             try {
-                await this.getBlockBlobURL(blobName).delete(Aborter.none);
-                resolve();
+                if (await this.fileExists(blobName)) {
+                    await this.getBlockBlobURL(blobName).delete(Aborter.none);
+                    resolve();
+                } else {
+                    reject(`Blob "${blobName}" does not exist in "${this.options.containerName}"`);
+                }
             } catch (e) {
                 reject(e);
             }

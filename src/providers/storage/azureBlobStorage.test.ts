@@ -24,6 +24,12 @@ describe("Azure blob functions", () => {
 
     registerProviders();
 
+    it("Indicates whether or not a file exists", async () => {
+        const provider: AzureBlobStorage = new AzureBlobStorage(options);
+        expect(await provider.fileExists(ad.blobName)).toBe(true);
+        await expect(provider.fileExists("doesNotExist.ext")).rejects.not.toBeNull();
+    });
+
     it("Reads text from a blob", async () => {
         const blockBlobURL = BlockBlobURL as jest.Mocked<typeof BlockBlobURL>;
 
@@ -44,6 +50,8 @@ describe("Azure blob functions", () => {
             ad.blobName,
         );
         expect(content).toEqual(ad.blobText);
+
+        await expect(provider.fileExists("doesNotExist.ext")).rejects.not.toBeNull();
     });
 
     it("Reads buffer from a blob", async () => {
