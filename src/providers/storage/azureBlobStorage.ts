@@ -42,25 +42,16 @@ export class AzureBlobStorage implements IStorageProvider {
      * @throws - Error if container does not exist or not able to
      * connect to Azure Blob Storage
      */
-    public initialize(): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            try {
-                const containerName = this.options.containerName;
-                if (this.options.createContainer) {
-                    await this.createContainer(containerName);
-                    resolve();
-                } else {
-                    const containers = await this.listContainers(null);
-                    if (containers.indexOf(containerName) > -1) {
-                        resolve();
-                    } else {
-                        throw new Error(`Container "${containerName}" does not exist`);
-                    }
-                }
-            } catch (e) {
-                reject(e);
+    public async initialize(): Promise<void> {
+        const containerName = this.options.containerName;
+        if (this.options.createContainer) {
+            await this.createContainer(containerName);
+        } else {
+            const containers = await this.listContainers(null);
+            if (containers.indexOf(containerName) < 0) {
+                throw new Error(`Container "${containerName}" does not exist`);
             }
-        });
+        }
     }
 
     public async fileExists(blobName: string): Promise<boolean> {
@@ -73,21 +64,15 @@ export class AzureBlobStorage implements IStorageProvider {
      * Reads text from specified blob
      * @param blobName - Name of blob in container
      */
-    public readText(blobName: string): Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
-            try {
-                if (await this.fileExists(blobName)) {
-                    const blockBlobURL = this.getBlockBlobURL(blobName);
-                    const downloadResponse = await blockBlobURL.download(Aborter.none, 0);
-                    const downloadString = await this.bodyToString(downloadResponse);
-                    resolve(downloadString);
-                } else {
-                    reject(`Blob "${blobName}" does not exist in "${this.options.containerName}"`);
-                }
-            } catch (e) {
-                reject(e);
-            }
-        });
+    public async readText(blobName: string): Promise<string> {
+        if (await this.fileExists(blobName)) {
+            const blockBlobURL = this.getBlockBlobURL(blobName);
+            const downloadResponse = await blockBlobURL.download(Aborter.none, 0);
+            const downloadString = await this.bodyToString(downloadResponse);
+            return downloadString;
+        } else {
+            throw new Error(`Blob "${blobName}" does not exist in "${this.options.containerName}"`);
+        }
     }
 
     /**
@@ -105,19 +90,11 @@ export class AzureBlobStorage implements IStorageProvider {
      * @param content - Content to write to blob (string or Buffer)
      */
     public async writeText(blobName: string, content: string | Buffer) {
-        return new Promise<void>(async (resolve, reject) => {
-            try {
-                const blockBlobURL = this.getBlockBlobURL(blobName);
-                const uploadBlobResponse = await blockBlobURL.upload(
-                    Aborter.none,
-                    content,
-                    content.length,
-                );
-                resolve();
-            } catch (e) {
-                reject(e);
-            }
-        });
+        await this.getBlockBlobURL(blobName).upload(
+            Aborter.none,
+            content,
+            content.length,
+        );
     }
 
     /**
@@ -133,19 +110,12 @@ export class AzureBlobStorage implements IStorageProvider {
      * Deletes file from container
      * @param blobName - Name of blob in container
      */
-    public deleteFile(blobName: string): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            try {
-                if (await this.fileExists(blobName)) {
-                    await this.getBlockBlobURL(blobName).delete(Aborter.none);
-                    resolve();
-                } else {
-                    reject(`Blob "${blobName}" does not exist in "${this.options.containerName}"`);
-                }
-            } catch (e) {
-                reject(e);
-            }
-        });
+    public async deleteFile(blobName: string): Promise<void> {
+        if (await this.fileExists(blobName)) {
+            await this.getBlockBlobURL(blobName).delete(Aborter.none);
+        } else {
+            throw new Error(`Blob "${blobName}" does not exist in "${this.options.containerName}"`);
+        }
     }
 
     /**
@@ -156,29 +126,23 @@ export class AzureBlobStorage implements IStorageProvider {
      * @param ext - Extension of files to filter on when retrieving files
      * from container
      */
-    public listFiles(path: string, ext?: string): Promise<string[]> {
-        return new Promise<string[]>(async (resolve, reject) => {
-            try {
-                const result: string[] = [];
-                let marker;
-                const containerURL = this.getContainerURL();
-                do {
-                    const listBlobsResponse = await containerURL.listBlobFlatSegment(
-                        Aborter.none,
-                        marker,
-                    );
-                    marker = listBlobsResponse.nextMarker;
-                    for (const blob of listBlobsResponse.segment.blobItems) {
-                        if ((ext && blob.name.endsWith(ext)) || !ext) {
-                            result.push(blob.name);
-                        }
-                    }
-                } while (marker);
-                resolve(result);
-            } catch (e) {
-                reject(e);
+    public async listFiles(path: string, ext?: string): Promise<string[]> {
+        const result: string[] = [];
+        let marker;
+        const containerURL = this.getContainerURL();
+        do {
+            const listBlobsResponse = await containerURL.listBlobFlatSegment(
+                Aborter.none,
+                marker,
+            );
+            marker = listBlobsResponse.nextMarker;
+            for (const blob of listBlobsResponse.segment.blobItems) {
+                if ((ext && blob.name.endsWith(ext)) || !ext) {
+                    result.push(blob.name);
+                }
             }
-        });
+        } while (marker);
+        return result;
     }
 
     /**
@@ -186,26 +150,20 @@ export class AzureBlobStorage implements IStorageProvider {
      * @param path - NOT USED IN CURRENT IMPLEMENTATION. Lists containers in storage account.
      * Path does not really make sense in this scenario. Included to satisfy interface
      */
-    public listContainers(path: string) {
-        return new Promise<string[]>(async (resolve, reject) => {
-            try {
-                const result: string[] = [];
-                let marker;
-                do {
-                    const listContainersResponse = await this.getServiceURL().listContainersSegment(
-                        Aborter.none,
-                        marker,
-                    );
-                    marker = listContainersResponse.nextMarker;
-                    for (const container of listContainersResponse.containerItems) {
-                        result.push(container.name);
-                    }
-                } while (marker);
-                resolve(result);
-            } catch (e) {
-                reject(e);
+    public async listContainers(path: string) {
+        const result: string[] = [];
+        let marker;
+        do {
+            const listContainersResponse = await this.getServiceURL().listContainersSegment(
+                Aborter.none,
+                marker,
+            );
+            marker = listContainersResponse.nextMarker;
+            for (const container of listContainersResponse.containerItems) {
+                result.push(container.name);
             }
-        });
+        } while (marker);
+        return result;
     }
 
     /**
@@ -214,17 +172,8 @@ export class AzureBlobStorage implements IStorageProvider {
      * is a required attribute of the Azure Cloud Storage options used to instantiate the
      * provider, this function creates that container. Included to satisfy interface
      */
-    public createContainer(containerName: string): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            try {
-                const containerURL = this.getContainerURL();
-                await containerURL.create(Aborter.none);
-                resolve();
-            } catch (e) {
-                reject(e);
-            }
-
-        });
+    public async createContainer(containerName: string): Promise<void> {
+        await this.getContainerURL().create(Aborter.none);
     }
 
     /**
@@ -233,15 +182,8 @@ export class AzureBlobStorage implements IStorageProvider {
      * is a required attribute of the Azure Cloud Storage options used to instantiate the
      * provider, this function creates that container. Included to satisfy interface
      */
-    public deleteContainer(containerName: string): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            try {
-                await this.getContainerURL().delete(Aborter.none);
-                resolve();
-            } catch (e) {
-                reject(e);
-            }
-        });
+    public async deleteContainer(containerName: string): Promise<void> {
+        await this.getContainerURL().delete(Aborter.none);
     }
 
     /**
