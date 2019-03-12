@@ -8,6 +8,14 @@
         padding-right: 10px;
     }
 
+    .btn-group:last-child {
+        border: none;
+        flex-grow: 1;
+        justify-content: flex-end;
+        padding: 0;
+        margin: 0 !important;
+    }
+
     .toolbar-btn {
         width: 48px;
         height: 48px;

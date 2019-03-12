@@ -200,6 +200,9 @@ export interface IAppStrings {
                 title: string;
                 confirmation: string;
             },
+        },
+        help: {
+            title: string;
         }
     };
     export: {

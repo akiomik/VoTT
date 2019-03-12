@@ -200,6 +200,9 @@ export const spanish: IAppStrings = {
                 confirmation: "¿Está seguro que quiere borrar todas las regiones?",
             },
         },
+        help: {
+            title: "Ayuda de la página del editor"
+        }
     },
     export: {
         title: "Exportar",

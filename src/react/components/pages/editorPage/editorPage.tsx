@@ -24,6 +24,7 @@ import CanvasHelpers from "./canvasHelpers";
 import { tagColors } from "../../../../common/tagColors";
 import { ToolbarItemName } from "../../../../registerToolbar";
 import { SelectionMode } from "vott-ct/lib/js/CanvasTools/Interface/ISelectorSettings";
+import { HelpModal } from "./helpModal";
 
 /**
  * Properties for Editor Page
@@ -59,6 +60,8 @@ export interface IEditorPageState {
     selectedTag: string;
     /** Tags locked for region labeling */
     lockedTags: string[];
+    /** Help modal is shown */
+    showHelpModal: boolean;
 }
 
 function mapStateToProps(state: IApplicationState) {
@@ -89,6 +92,7 @@ export default class EditorPage extends React.Component<IEditorPageProps, IEdito
         childAssets: [],
         editorMode: EditorMode.Rectangle,
         additionalSettings: { videoSettings: (this.props.project) ? this.props.project.videoSettings : null },
+        showHelpModal: false,
     };
 
     private loadingProjectAssets: boolean = false;
@@ -179,6 +183,12 @@ export default class EditorPage extends React.Component<IEditorPageProps, IEdito
                             onTagsChanged={this.onFooterChange}
                             onTagClicked={this.onTagClicked}
                             onCtrlTagClicked={this.onCtrlTagClicked}
+                        />
+                    </div>
+                    <div>
+                        <HelpModal
+                            show={this.state.showHelpModal}
+                            onClose={() => this.setState({showHelpModal: false})}
                         />
                     </div>
                 </div>
@@ -350,6 +360,9 @@ export default class EditorPage extends React.Component<IEditorPageProps, IEdito
                 this.canvas.current.confirmRemoveAllRegions();
                 break;
             case ToolbarItemName.Help:
+                this.setState({
+                    showHelpModal: !this.state.showHelpModal,
+                })
                 break;
         }
     }

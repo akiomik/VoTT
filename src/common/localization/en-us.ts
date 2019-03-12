@@ -199,6 +199,9 @@ export const english: IAppStrings = {
                 confirmation: "Are you sure you want to remove all regions?",
             },
         },
+        help: {
+            title: "Editor Page Help",
+        }
     },
     export: {
         title: "Export",

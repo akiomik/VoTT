@@ -1,0 +1,29 @@
+@import '../../../../assets/sass/theme.scss';
+
+.help-modal {
+    padding: 5px;
+}
+
+.editor-toolbar-help {
+    border-bottom: 1px;
+}
+
+
+.toolbar-item {
+
+    color: #CCC;
+    .toolbar-btn {
+        width: 30px;
+        height: 30px;
+        outline: none;
+
+        background-color: transparent;
+        border: none;
+
+
+
+    }
+    &:hover, &.active {
+        color: #ffffff
+    }  
+}
