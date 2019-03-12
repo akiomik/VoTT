@@ -178,6 +178,7 @@ export interface IAppStrings {
             nextAsset: string;
             saveProject: string;
             exportProject: string;
+            help: string;
         }
         videoPlayer: {
             nextTaggedFrame: {

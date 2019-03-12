@@ -174,9 +174,10 @@ export const spanish: IAppStrings = {
             paste: "Pegar regiones (Ctrl + V)",
             removeAllRegions: "Eliminar Todas Las Regiones (Ctrl + Delete)",
             previousAsset: "Activo anterior (W)",
-            nextAsset: "Siguiente activo (S)",
+            nextAsset: "Activo Siguiente (S)",
             saveProject: "Guardar Proyecto (Ctrl + S)",
             exportProject: "Exprtar Proyecto (Ctrl + E)",
+            help: "Ayuda (Ctrl + H)",
         },
         videoPlayer: {
             previousTaggedFrame: {

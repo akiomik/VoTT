@@ -176,6 +176,7 @@ export const english: IAppStrings = {
             nextAsset: "Next Asset (S)",
             saveProject: "Save Project (Ctrl + S)",
             exportProject: "Export Project (Ctrl + E)",
+            help: "Help (Ctrl + H)",
         },
         videoPlayer: {
             previousTaggedFrame: {

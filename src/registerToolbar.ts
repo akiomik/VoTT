@@ -17,6 +17,7 @@ export enum ToolbarItemName {
     NextAsset = "navigateNextAsset",
     SaveProject = "saveProject",
     ExportProject = "exportProject",
+    Help = "help",
 }
 
 export enum ToolbarItemGroup {
@@ -24,6 +25,7 @@ export enum ToolbarItemGroup {
     Regions = "regions",
     Navigation = "navigation",
     Project = "project",
+    Help = "help",
 }
 
 /**
@@ -137,4 +139,13 @@ export default function registerToolbar() {
         type: ToolbarItemType.Action,
         accelerators: ["Ctrl+e", "Ctrl+E"],
     }, ExportProject);
+
+    ToolbarItemFactory.register({
+        name: ToolbarItemName.Help,
+        tooltip: strings.editorPage.toolbar.help,
+        icon: "fa-question-circle",
+        group: ToolbarItemGroup.Help,
+        type: ToolbarItemType.Action,
+        accelerators: ["Ctrl+h", "Ctrl+H"],
+    })
 }
