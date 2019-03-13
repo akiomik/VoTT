@@ -147,5 +147,5 @@ export default function registerToolbar() {
         group: ToolbarItemGroup.Help,
         type: ToolbarItemType.Action,
         accelerators: ["Ctrl+h", "Ctrl+H"],
-    })
+    });
 }

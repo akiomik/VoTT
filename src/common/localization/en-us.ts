@@ -201,7 +201,7 @@ export const english: IAppStrings = {
         },
         help: {
             title: "Editor Page Help",
-        }
+        },
     },
     export: {
         title: "Export",

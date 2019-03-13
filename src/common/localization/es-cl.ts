@@ -201,8 +201,8 @@ export const spanish: IAppStrings = {
             },
         },
         help: {
-            title: "Ayuda de la página del editor"
-        }
+            title: "Ayuda de la página del editor",
+        },
     },
     export: {
         title: "Exportar",

@@ -362,7 +362,7 @@ export default class EditorPage extends React.Component<IEditorPageProps, IEdito
             case ToolbarItemName.Help:
                 this.setState({
                     showHelpModal: !this.state.showHelpModal,
-                })
+                });
                 break;
         }
     }

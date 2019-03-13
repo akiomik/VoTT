@@ -5,12 +5,12 @@ import { ToolbarItemFactory } from "../../../../providers/toolbar/toolbarItemFac
 import "./helpModal.scss";
 
 export interface IHelpModalProps {
-    show?: boolean;
+    show: boolean;
     onClose?: () => void;
 }
 
 export class HelpModal extends React.Component<IHelpModalProps> {
-    render() {
+    public render() {
         return (
             <div className={"help-modal"}>
                 <MessageBox
@@ -21,7 +21,7 @@ export class HelpModal extends React.Component<IHelpModalProps> {
                     hideFooter={true}
                 />
             </div>
-        )
+        );
     }
 
     private getHelpBody = () => {
@@ -35,7 +35,7 @@ export class HelpModal extends React.Component<IHelpModalProps> {
                     }
                 </div>
             </div>
-        )        
+        );
     }
 
     private getToolbarItemRow = (item) => {
