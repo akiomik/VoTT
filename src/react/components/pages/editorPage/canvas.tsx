@@ -242,6 +242,9 @@ export default class Canvas extends React.Component<ICanvasProps, ICanvasState> 
      * @returns {void}
      */
     private onSelectionEnd = (regionData: RegionData) => {
+        if(regionData.x === 0 && regionData.y === 0 && regionData.width === 0 && regionData.height === 0){
+            return;
+        }
         const id = shortid.generate();
 
         this.editor.RM.addRegion(id, regionData, null);
