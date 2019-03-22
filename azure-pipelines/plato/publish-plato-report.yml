@@ -1,3 +1,6 @@
+name: $(Date:yyyyMMdd).$(Hours)$(Minutes)$(Seconds)
+variables:
+    AZURE_STORAGE_ACCOUNT: vottv2
 trigger:
   - dev*
   - v2
