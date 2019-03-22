@@ -1,18 +1,6 @@
 #!/bin/bash
 set -eo pipefail
 
-ACCOUNT=$(AZURE_STORAGE_ACCOUNT)
-if [[ -z "${ACCOUNT}" ]]; then
-  echo "Need to set AZURE_STORAGE_ACCOUNT"
-  exit 1
-fi
-
-KEY=$(AZURE_STORAGE_KEY)
-if [[ -z "${KEY}" ]]; then
-  echo "Need to set AZURE_STORAGE_KEY"
-  exit 1
-fi
-
 # NOTE: this script should be ran from the root of the repository; the CWD should reflect this
 BASEDIR=$(dirname "$0")
 REPORT_DIR=$(pwd)/report
