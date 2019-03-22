@@ -1,0 +1,38 @@
+trigger:
+  - dev*
+  - v2
+pr: none # disable CI build for PR
+
+pool:
+  vmImage: 'Ubuntu-16.04'
+
+steps:
+- bash: |
+    set -e
+
+    COMMIT_SHA=`echo ${BUILD_SOURCEVERSION} | cut -c1-8`
+    echo "sha: " $COMMIT_SHA
+
+    # rewrite build number
+    echo "##vso[build.updatebuildnumber]Report-${COMMIT_SHA}-${BUILD_BUILDNUMBER}"
+  displayName: "Rewrite build number"
+
+- task: NodeTool@0
+  displayName: 'Use Node 10.x'
+  inputs:
+    versionSpec: 10.x
+
+- task: Bash@3
+    displayName: 'Generate report'
+    inputs:
+      targetType: filePath
+      filePath: './scripts/update.sh'
+
+- task: AzureFileCopy@2
+    displayName: 'Upload report'
+    inputs:
+      SourcePath: ./report/
+      azureSubscription: 'PELITTLE TEAM - CSE DWR (d36d0808-a967-4f73-9fdc-32ea232fc81d)'
+      Destination: AzureBlob
+      storage: myhotestvottreport
+      ContainerName: '$web'
